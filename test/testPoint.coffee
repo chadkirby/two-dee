@@ -53,49 +53,55 @@ describe '2d Point', ->
     p.isFuzzyEq(p1, 1).should.equal yes
 
   it 'should have absolute value', ->
-      Point(-1, -1).abs.isEq([1,1]).should.equal yes
-      Point(0, -1).abs.isEq([0,1]).should.equal yes
+      Point(-1, -1).abs().isEq([1,1]).should.equal yes
+      Point(0, -1).abs().isEq([0,1]).should.equal yes
 
   it 'should have negated value', ->
-      Point(-1, 0).neg.isEq([1,0]).should.equal yes
-      Point(0, 1).neg.isEq([0,-1]).should.equal yes
+      Point(-1, 0).neg().isEq([1,0]).should.equal yes
+      Point(0, 1).neg().isEq([0,-1]).should.equal yes
 
   it 'should have transposed value', ->
-      Point(-1, 0).transpose.isEq([0,-1]).should.equal yes
+      Point(-1, 0).transpose().isEq([0,-1]).should.equal yes
 
   it 'should have string value', ->
-      Point(-1, 0).asString.should.equal "-1, 0"
+      Point(-1, 0).asString().should.equal "-1, 0"
       Point(-1, 0).inspect().should.equal "Point2d( -1, 0 )"
 
   it 'should support point addition', ->
     p1 =  Point( 0 , 1 )
     p2 =  Point( 1 , 1 )
-    p1.plus(p2).asString.should.equal "1, 2"
-    p1.translate(p2).asString.should.equal "1, 2"
-    p1.plus(2).asString.should.equal "2, 3"
-    p1.plus([2,3]).asString.should.equal "2, 4"
+    p1.plus(p2).asString().should.equal "1, 2"
+    p1.translate(p2).asString().should.equal "1, 2"
+    p1.plus(2).asString().should.equal "2, 3"
+    p1.plus([2,3]).asString().should.equal "2, 4"
 
   it 'should support point subtraction', ->
     p1 =  Point( 0 , 1 )
     p2 =  Point( 1 , 1 )
-    p1.minus(p2).asString.should.equal "-1, 0"
-    p1.minus(2).asString.should.equal "-2, -1"
-    p1.minus([2,3]).asString.should.equal "-2, -2"
+    p1.minus(p2).asString().should.equal "-1, 0"
+    p1.minus(2).asString().should.equal "-2, -1"
+    p1.minus([2,3]).asString().should.equal "-2, -2"
 
   it 'should support point division', ->
     p1 =  Point( 0 , 1 )
     p2 =  Point( 1 , 1 )
-    p1.div(p2).asString.should.equal "0, 1"
-    p1.div(2).asString.should.equal "0, 0.5"
-    p1.div([2,4]).asString.should.equal "0, 0.25"
+    p1.div(p2).asString().should.equal "0, 1"
+    p1.div(2).asString().should.equal "0, 0.5"
+    p1.div([2,4]).asString().should.equal "0, 0.25"
 
-  it 'should support point multiplication', ->
+  it 'should scale about the origin', ->
     p1 =  Point( 0 , 1 )
     p2 =  Point( 2 , 3 )
-    p1.scale(p2).asString.should.equal "0, 3"
-    p1.times(p2).asString.should.equal "0, 3"
-    p1.scale(2).asString.should.equal "0, 2"
-    p1.scale([2,3]).asString.should.equal "0, 3"
+    p1.scale(p2).asString().should.equal "0, 3"
+    p1.times(p2).asString().should.equal "0, 3"
+    p1.scale(2).asString().should.equal "0, 2"
+    p1.scale([2,3]).asString().should.equal "0, 3"
+
+  it 'should scale about a point', ->
+    p1 =  Point( 0 , 1 )
+    p2 =  Point( 1, 1 )
+    p1.scaleAbout(2, p2).asString().should.equal "-1, 1"
+    p1.scaleAbout(0.5, p2).asString().should.equal "0.5, 1"
 
   it 'should roundTo a quantum', ->
     p1 =  Point( 1 , 0 ).rotate(degrad 90)
@@ -116,12 +122,18 @@ describe '2d Point', ->
     x.should.equal 2
     y.should.equal 2
 
-  it 'should support rotation', ->
+  it 'should rotate about the origin', ->
     p1 =  Point( 1 , 0 )
     rsqrt2 = 1 / Math.sqrt 2
     p1.rotate(degrad 45).isFuzzyEq( rsqrt2, rsqrt2, 1e-10).should.equal yes
     p1.rotate(degrad 90).isFuzzyEq( [0,1], 1e-10).should.equal yes
     p1.rotate(degrad -90).isFuzzyEq( {x: 0, y: -1}, 1e-10).should.equal yes
+
+  it 'should rotate about a point', ->
+    p1 =  Point( 1 , 0 )
+    p1.rotateAbout(degrad(90), [1,1]).isFuzzyEq( [2,1], 1e-10).should.equal yes
+    # p1.rotateAbout(degrad(-90), 1, 1).isFuzzyEq( {x: 0, y: 1}, 1e-10).should.equal yes
+    # p1.rotateAbout(degrad(-90), Point(1, 1)).isFuzzyEq( {x: 0, y: 1}, 1e-10).should.equal yes
 
   it 'should compute distance to a point', ->
     p1 =  Point( 1 , 0 )
@@ -131,11 +143,10 @@ describe '2d Point', ->
     p1.dist([0,1]).should.equal sqrt2
 
   it 'should compute angle to a point', ->
-    p1 =  Point( 0, 0 )
-    sqrt2 = Math.sqrt 2
-    p1.angleToDeg([1,0]).should.equal 0
-    p1.angleToDeg([2,2]).should.equal 45
-    p1.angleToDeg([0,2]).should.equal 90
+    p1 =  Point( 1, 1 )
+    p1.angleToDeg([2,1]).should.equal 0
+    p1.angleToDeg([3,3]).should.equal 45
+    p1.angleToDeg([1,3]).should.equal 90
 
   it 'should be subclassable', ->
     class MyPoint extends Point
@@ -153,6 +164,8 @@ describe '2d Point', ->
       baz: -> "bat"
 
     p1 =  MyPoint( 0, 1, "foo" )
+    (p1 instanceof MyPoint).should.equal yes
+    (p1 instanceof Point).should.equal yes
     p1.x.should.equal 0
     p1.y.should.equal 1
     p1.foo.should.equal "foo"

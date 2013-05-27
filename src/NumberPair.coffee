@@ -26,25 +26,25 @@ class NumberPair
       0:
          get: (-> @_numPair[0]), 
          set: ((val) -> @_numPair[0] = val)
-
       1:
          get: (-> @_numPair[1]), 
          set: ((val) -> @_numPair[1] = val)
+      length:
+         value: 2
+      type:
+         get: -> util.getName(@constructor)
 
+   asString: (opts) -> 
+      if opts?.round?
+         @round(opts.round).asString()
+      else
+         "#{@_numPair[0]}, #{@_numPair[1]}"
 
-   get = util.get.bind(@)
+   asArray: -> @_numPair[..]
 
-   get asString: -> "#{@_numPair[0]}, #{@_numPair[1]}"
+   toString: -> @::asString
 
-   get asArray: -> (val for val in @_numPair)
-
-   get type: -> util.getName(@constructor)
-
-   toString: -> @asString
-
-   inspect: -> "#{@type}( #{@asString} )"
-
-   defineProperty @::, 'length', value: 2 # support array behavior
+   inspect: -> "#{@type}( #{@asString()} )"
 
    set: (arg0, arg1) -> 
       @_numPair[0] = arg0 if arg0?
@@ -84,7 +84,7 @@ class NumberPair
          when isNumber( x, y )       then new NumberPair [x, y]
          when isNumber( x )          then new NumberPair [x, x]
          else
-            console.warn "NumberPair.new requires numeric inputss; got #{x} and #{y}"
+            throw "NumberPair.new requires numeric inputss; got #{x} and #{y}"
             null
 
 module.exports = NumberPair
