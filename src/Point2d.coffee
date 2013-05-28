@@ -71,15 +71,22 @@ class Point2d extends NumberPair
    minus: (aPoint) ->
       aPoint = @constructor.new arguments...
       new @constructor( @x - aPoint.x, @y - aPoint.y )
+   subtract: @::minus
 
    div: (aPoint) ->
       aPoint = @constructor.new arguments...
       new @constructor( @x / aPoint.x, @y / aPoint.y )
-    
+   dividedBy: @::div
+   
    scale: (aPoint) ->
       aPoint = @constructor.new arguments...
       new @constructor( @x * aPoint.x, @y * aPoint.y )
    times: @::scale
+   multiply: @::scale
+
+   dot: (aPoint) ->
+      aPoint = @constructor.new arguments...
+      @x * aPoint.x + @y * aPoint.y
 
    scaleAbout: (factor, aPoint...) -> # in radians
       aPoint = @constructor.new aPoint...
@@ -94,7 +101,7 @@ class Point2d extends NumberPair
       aPoint = @constructor.new aPoint...
       @minus(aPoint).rotate(angle).plus(aPoint)
 
-   dist: (aPoint) ->
+   distTo: (aPoint) ->
       [dx, dy] = @minus arguments...
       hypot(dx,dy)
   
@@ -103,6 +110,15 @@ class Point2d extends NumberPair
       aPoint.minus(@).angle
 
    angleToDeg: -> @angleTo(arguments...)*180/PI
+
+   @quacksLikeAPoint: (obj) ->
+      return yes if (
+         obj instanceof Point2d or
+         obj.asPoint? or
+         isNumber( obj.x, obj.y ) or 
+         isNumber( obj[0], obj[1] )
+      ) 
+      no
 
    @new: (x, y) ->
       switch

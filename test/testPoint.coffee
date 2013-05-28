@@ -97,6 +97,12 @@ describe '2d Point', ->
     p1.scale(2).asString().should.equal "0, 2"
     p1.scale([2,3]).asString().should.equal "0, 3"
 
+  it 'should dot', ->
+    p1 =  Point( 1 , 1 )
+    p2 =  Point( -2 , 2 )
+    p1.dot(p2).should.equal 0
+    Point(5, 12).dot( -6, 8 ).should.equal 66
+
   it 'should scale about a point', ->
     p1 =  Point( 0 , 1 )
     p2 =  Point( 1, 1 )
@@ -138,9 +144,9 @@ describe '2d Point', ->
   it 'should compute distance to a point', ->
     p1 =  Point( 1 , 0 )
     sqrt2 = Math.sqrt 2
-    p1.dist([0,0]).should.equal 1
-    p1.rotate(degrad 45).dist([0,0]).should.equal 1
-    p1.dist([0,1]).should.equal sqrt2
+    p1.distTo([0,0]).should.equal 1
+    p1.rotate(degrad 45).distTo([0,0]).should.equal 1
+    p1.distTo([0,1]).should.equal sqrt2
 
   it 'should compute angle to a point', ->
     p1 =  Point( 1, 1 )

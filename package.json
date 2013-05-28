@@ -2,7 +2,7 @@
   "name": "two-dee",
   "version": "0.1.0",
   "description": "two-dimensional coordinate classes in coffeescript",
-  "main": "lib/Point2d.js",
+  "main": "lib/two-dee.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

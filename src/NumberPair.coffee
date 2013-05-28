@@ -46,6 +46,8 @@ class NumberPair
 
    inspect: -> "#{@type}( #{@asString()} )"
 
+   envelope: (offset = 3) -> 
+
    set: (arg0, arg1) -> 
       @_numPair[0] = arg0 if arg0?
       @_numPair[1] = arg1 if arg1?

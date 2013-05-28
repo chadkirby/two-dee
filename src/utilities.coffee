@@ -11,7 +11,13 @@ module.exports =
 
    hypot: (me, y) -> Math.sqrt(me*me + y*y)
 
+   square: (val) -> val * val
+
    roundTo: (me, nearest=1) -> Math.round(me/nearest)*nearest
+
+   exclusivelyBetween: (me, lo, hi) -> (lo < me) and (me < hi)
+   inclusivelyBetween: (me, lo, hi) -> (lo <= me) and (me <= hi)
+
 
    getName: (obj) ->
       results = /function (.+?)\(/.exec(obj.toString())
@@ -19,15 +25,6 @@ module.exports =
          results[1] 
       else 
          ""
-
-   quacksLikeAPoint: (obj) ->
-      if (
-         isNumber( obj.x, obj.y ) or 
-         isNumber( obj[0], obj[1] )
-      ) 
-         yes
-      else
-         no
 
    isNumber: isNumber
 
@@ -42,4 +39,6 @@ module.exports =
          names = key.split ','
          for name in names
             defineProperty @::, name.trim(), get: fn
+
+
 
