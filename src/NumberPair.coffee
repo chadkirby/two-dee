@@ -86,7 +86,7 @@ class NumberPair
          when isNumber( x, y )       then new NumberPair [x, y]
          when isNumber( x )          then new NumberPair [x, x]
          else
-            throw "NumberPair.new requires numeric inputss; got #{x} and #{y}"
+            throw "NumberPair.new requires numeric inputs; got #{x} and #{y}"
             null
 
 module.exports = NumberPair

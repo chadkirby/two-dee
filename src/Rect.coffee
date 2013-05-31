@@ -86,6 +86,7 @@ class Rect
    moveTo: (aPoint) -> 
       aPoint = Point.new arguments...
       new Rect(aPoint.x, aPoint.y, @right - @left + aPoint.x, @bottom - @top + aPoint.y)
+   translate: @::moveTo
     
    resizeBy: (h, v) -> new Rect(@left, @top, @right + h, @bottom + v)
   

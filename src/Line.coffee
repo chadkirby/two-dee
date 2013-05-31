@@ -64,14 +64,23 @@ class LineSegment
    mapPoints: (fn) ->
       @points = for point, i in @points
          fn(point, i)
+      this
 
    scaleAbout: (factor, origin = Point.origin) ->
-      mapPoints (point, i) ->
+      @mapPoints (point, i) ->
          point.scaleAbout( factor, origin )
 
    rotateAbout: (factor, origin = Point.origin) ->
-      mapPoints (point, i) ->
+      @mapPoints (point, i) ->
          point.rotateAbout( factor, origin )
+
+   translate: (aPoint) ->
+      aPoint = Point.new arguments...
+      @copy().mapPoints (point, i) -> 
+         console.log point, aPoint, point.translate(aPoint)
+         point.translate aPoint
+
+
 
    yAt: (x) -> @m * (x - @x0) + @y0 # returns y value for a given x
 
