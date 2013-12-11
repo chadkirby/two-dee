@@ -16,24 +16,34 @@ class Rect
    constructor: (left=0, top=0, right=0, bottom=0) ->
       unless this instanceof Rect
          return new Rect(left, top, right, bottom)
-      @left = left
-      @top = top
-      @right = right
-      @bottom = bottom
+      @left = left #min(left, right)
+      @top = top #min(top, bottom)
+      @right = right #max(left, right)
+      @bottom = bottom #max(top, bottom)
+      # console.log {left, top, right, bottom}
+      # console.log @inspect()
 
    defProp = util.defProp.bind(@)
    
    defProp 
       'width, w':
          get: -> @right - @left
-         set: (h) -> @width_(h)
+         set: (h) -> @right = @left + h
       'height, h':
          get: -> @bottom - @top
-         set: (v) -> @height_(v)
+         set: (v) -> @bottom = @top + v
       x: 
          get: -> @left
+         set: (x) -> 
+            w = @w
+            @left = x
+            @right = x + w
       y: 
          get: -> @top
+         set: (y) -> 
+            h = @h
+            @top = y
+            @bottom = y + h
 
       origin:
          get: -> Point.new(@left, @top)
@@ -42,25 +52,61 @@ class Rect
       extent:
          get: -> Point.new(@right - @left, @bottom - @top)
       
-      leftTop:
+      'leftTop, topLeft':
          get: -> Point.new(@left, @top)
-      rightTop:
+      'rightTop, topRight':
          get: -> Point.new(@right, @top)
-      leftBottom:
+      'leftBottom, bottomLeft':
          get: -> Point.new(@left, @bottom)
-      rightBottom:
+      'rightBottom, bottomRight':
          get: -> Point.new(@right, @bottom)
       type:
          get: -> util.getName(@constructor)
+      center:
+         get: -> @origin.translate @extent.scale(0.5)
 
-   width_: (h) -> @right = @left + h; this
-   height_: (v) -> @bottom = @top + v; this
+   # width_: (h) -> @right = @left + h; this
+   # height_: (v) -> bottom = @top + v; this
+   # top_: (t) -> h = @h; @top = t; @bottom = t + h; this
 
-   copy: -> new @constructor( @left, @right, @top, @bottom )
+   copy: -> new @constructor( @left, @top, @right, @bottom )
    inspect: -> "#{@type}( #{@asString()} )"
 
    asString: (opts) -> 
-      "#{@left}, #{@top}, #{@right}, #{@bottom}"
+      "#{@left}, #{@top}, #{@width}, #{@height}"
+
+   asPolygon: ->
+      Polygon = require './Polygon'
+      Polygon [@leftTop, @rightTop, @rightBottom, @leftBottom]...
+
+   rotate: (angle) ->
+      @asPolygon().rotateAbout( angle, @leftTop )
+
+   lineSegments: ->
+      Line = require './Line'
+      {
+         left: new Line( @leftTop, @leftBottom )
+         right: new Line( @rightTop, @rightBottom )
+         top: new Line( @topLeft, @topRight )
+         bottom: new Line( @bottomLeft, @bottomRight )
+      }
+
+   closestPointOnShape: (aPoint) ->
+      aPoint = Point.new arguments...
+      segment = @closestShapeSegment(aPoint)
+      segment.closestPointOnSegment(aPoint)
+
+   closestShapeSegment: (aPoint) ->
+      aPoint = Point.new arguments...
+      minDist = Infinity
+      closestSegment = null
+      for key, segment of @lineSegments()
+         pt = segment.closestPointOnSegment(aPoint)
+         dist = pt.distTo(aPoint)
+         if dist < minDist
+            minDist = dist
+            closestSegment = segment
+      closestSegment
 
    svgString: (opts = {}) ->
       svg = if opts.ccw or opts.inside or /^cc|counter|inside/.test(opts.direction or opts.wind) 
@@ -80,15 +126,20 @@ class Rect
       svg.join '   '
    
    envelope: (offset = 3) -> @insetBy(-offset, -offset) 
+   inflate: @::envelope
 
-   moveBy: (h, v) -> new Rect(@left + h, @top + v, @right + h, @bottom + v)
+   moveBy: (h, v) -> 
+      pt = Point.new arguments...
+      new Rect(@left + pt.x, @top + pt.y, @right + pt.x, @bottom + pt.y)
+   translate: @::moveBy
   
    moveTo: (aPoint) -> 
       aPoint = Point.new arguments...
-      new Rect(aPoint.x, aPoint.y, @right - @left + aPoint.x, @bottom - @top + aPoint.y)
-   translate: @::moveTo
+      new Rect(aPoint.x, aPoint.y, @width + aPoint.x, @height + aPoint.y)
     
    resizeBy: (h, v) -> new Rect(@left, @top, @right + h, @bottom + v)
+   
+   scale: (factor) -> @resizeTo(@w*factor, @h*factor)
   
    resizeTo: (h, v) -> new Rect(@left, @top, @left + h, @top + v)
   
@@ -96,9 +147,18 @@ class Rect
   
    insetAll: (a, b, c, d) -> new Rect(@left + a, @top + b, @right - c, @bottom - d)
   
-   contains: (aPoint) ->  
-      uitl.inclusivelyBetween( aPoint.x, @left, @right ) and
-      uitl.inclusivelyBetween( aPoint.y, @bottom, @top )
+   contains: (aPoint) -> 
+      {x, y} = aPoint
+      (@left <= x <= @right) and
+      (@bottom <= y <= @top)
+   
+   includes: (aRect) -> 
+      aRect = Rect.new aRect
+      return no if aRect.right > @right
+      return no if aRect.bottom > @bottom
+      return no if aRect.left < @left
+      return no if aRect.top < @top
+      yes
    
    intersects: (aRect) -> 
       aRect = Rect.new aRect
@@ -107,8 +167,39 @@ class Rect
       return no if aRect.left > @right
       return no if aRect.top > @bottom
       yes
-   
 
+   positionComparedTo: (aRect, opts={}) ->
+      aRect = Rect.new aRect
+      opts.referencePoint ?= 'center'
+      opts.flipY ?= no
+      pt = @[opts.referencePoint]
+      otherPt = aRect[opts.referencePoint]
+      below = if opts.flipY then otherPt.y > pt.y else otherPt.y < pt.y
+      above = if opts.flipY then otherPt.y < pt.y else otherPt.y > pt.y
+      yAligned = pt.y is otherPt.y
+      leftOf = pt.x > otherPt.x
+      rightOf = pt.x < otherPt.x
+      xAligned = pt.x is otherPt.x
+
+      {
+         below
+         above
+         leftOf
+         rightOf
+         xAligned
+         yAligned
+      }
+
+   randomPoint: ->
+      crypto = require 'crypto'
+      pt = @origin
+      buf = crypto.randomBytes(4)
+      randX = @width * buf.readUInt16LE(0)/65536
+      randY = @height * buf.readUInt16LE(2)/65536
+      pt.moveBy(randX, randY)
+
+
+   @infinite: -> new Rect(Infinity, Infinity, -Infinity, -Infinity)
 
    @new: (arg0, arg1, arg2, arg3) ->
       switch
@@ -132,6 +223,15 @@ class Rect
                   p0.x + wid
                   p0.y + hgt
                )
+            else if (isNumber(arg0.w ? arg0.width, arg0.h ? arg0.height))
+               wid = arg0.w ? arg0.width
+               hgt = arg0.h ? arg0.height
+               new Rect(
+                  p0.x
+                  p0.y
+                  p0.x + wid
+                  p0.y + hgt
+               )
          else
             new Rect arguments...
 
@@ -139,9 +239,20 @@ module.exports = Rect
 
 if require.main is module
    r = Rect.new [0,0], 10, 3
+   r = Rect.new {x: 1, y: 0, w: 10, h: 1}
+   # r.x += 5
+   # r.x += 5
    console.log r
-   console.log r.svgString()
-   console.log r.svgString(ccw: yes)
-   console.log r.envelope()
+   # console.log r.svgString()
+   # console.log r.svgString(ccw: yes)
+   # console.log r.envelope()
+   # console.log r.center
+   # console.log r.copy()
+   # console.log r.inflate(3).lineSegments()
+   # console.log r.moveTo(Point.new(3,3))
+   # console.log r.closestShapeSegment [5, 15]
+   # console.log r.closestPointOnShape [5,15]
+   for i in [0..10]
+      console.log i, r.randomPoint()
 
 

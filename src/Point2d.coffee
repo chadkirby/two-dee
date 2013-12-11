@@ -41,6 +41,12 @@ class Point2d extends NumberPair
          get: (-> atan2( @y, @x ))
          set: ((new_theta) -> {@x, @y} = @asPolar().theta_(new_theta).asPoint())
 
+      'thetaDeg, angleDeg':
+         get: (-> atan2( @y, @x )*180/PI)
+         set: (new_theta) -> 
+            new_theta *= 57.29577951308232 
+            {@x, @y} = @asPolar().theta_(new_theta).asPoint()
+
    # get = util.get.bind(@)
 
    abs: -> new Point2d( abs(@x), abs(@y) )
@@ -67,6 +73,7 @@ class Point2d extends NumberPair
       new @constructor( @x + aPoint.x, @y + aPoint.y )
    translate: @::plus
    add: @::plus
+   moveBy: @::plus
 
    minus: (aPoint) ->
       aPoint = @constructor.new arguments...
@@ -88,11 +95,13 @@ class Point2d extends NumberPair
       aPoint = @constructor.new arguments...
       @x * aPoint.x + @y * aPoint.y
 
-   scaleAbout: (factor, aPoint...) -> # in radians
+   scaleAbout: (factor, aPoint...) ->
       aPoint = @constructor.new aPoint...
+      return this if @isEq(aPoint)
       @minus(aPoint).scale(factor).plus(aPoint)
 
-   rotate: (angle) -> # in radians
+   rotate: (angle, opts) -> # in radians
+      angle 
       sinr = sin(angle)
       cosr = cos(angle)
       new @constructor( (@x * cosr) - (@y * sinr), (@y * cosr) + (@x * sinr) )
@@ -112,13 +121,13 @@ class Point2d extends NumberPair
    angleToDeg: -> @angleTo(arguments...)*180/PI
 
    @quacksLikeAPoint: (obj) ->
-      return yes if (
-         obj instanceof Point2d or
-         obj.asPoint? or
-         isNumber( obj.x, obj.y ) or 
-         isNumber( obj[0], obj[1] )
-      ) 
-      no
+      switch
+         when not obj? then no
+         when obj instanceof Point2d then yes
+         when obj.asPoint? then yes
+         when isNumber( obj.x, obj.y ) then yes 
+         when isNumber( obj[0], obj[1] ) then yes
+         else no
 
    @new: (x, y) ->
       switch
@@ -130,7 +139,6 @@ class Point2d extends NumberPair
          when isNumber( x )          then new Point2d x, x
          else
             throw "Point2d.new requires numeric x and y; got #{x} and #{y}"
-            null
 
 Object.defineProperty Point2d, 'origin', get: -> new Point2d( 0, 0 )
 

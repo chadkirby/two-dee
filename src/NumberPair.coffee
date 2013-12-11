@@ -34,17 +34,22 @@ class NumberPair
       type:
          get: -> util.getName(@constructor)
 
-   asString: (opts) -> 
-      if opts?.round?
-         @round(opts.round).asString()
-      else
-         "#{@_numPair[0]}, #{@_numPair[1]}"
+   asString: (opts = {}) -> 
+      [p0, p1] = @_numPair
+      if opts.round?
+         that = NumberPair.new opts.round
+         p0 = roundTo p0, that[0]
+         p1 = roundTo p1, that[1]
+      if opts.fixed?
+         p0 = p0.toFixed opts.fixed
+         p1 = p1.toFixed opts.fixed
+      "#{p0}, #{p1}"
 
    asArray: -> @_numPair[..]
 
-   toString: -> @::asString
+   toString: @::asString
 
-   inspect: -> "#{@type}( #{@asString()} )"
+   inspect: -> "#{@type}( #{@asString(fixed: 4)} )"
 
    envelope: (offset = 3) -> 
 
