@@ -41,7 +41,9 @@ module.exports =
          for name in names
             name = name.trim()
             defineProperty @::, name, opts
-            if opts.set? # create SC-style setter function, called by name_(). eg, line.length = 7 is the same as line.length_(7)
+            if opts.set? 
+               # create chainable setter function, called by name_(). 
+               # eg, line.length = 7 is the same as line.length_(7)
                do(name) =>
                   defineProperty @::, name + "_", value: (val) -> this[name] = val; this
 

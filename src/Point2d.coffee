@@ -18,16 +18,15 @@ class Point2d extends NumberPair
       super [x, y]
 
       # define own properties (enables 'for own key, val of point')
-      Object.defineProperty @, 'x', 
-         enumerable: yes
-         get: -> @[0]
-         set: (val) -> @[0] = val
-
-      Object.defineProperty @, 'y', 
-         enumerable: yes
-         get: -> @[1]
-         set: (val) -> @[1] = val
-
+      Object.defineProperties @, 
+         x: 
+            enumerable: yes
+            get: -> @[0]
+            set: (val) -> @[0] = val
+         y: 
+            enumerable: yes
+            get: -> @[1]
+            set: (val) -> @[1] = val
 
    defProp = util.defProp.bind(@)
 
@@ -145,6 +144,10 @@ Object.defineProperty Point2d, 'origin', get: -> new Point2d( 0, 0 )
 module.exports = Point2d
 
 if require.main is module
+   exec = require('child_process').exec
+   exec 'cake build', (error, stdout, stderr) -> 
+      console.log {error, stdout, stderr}
+      # exec 'cake test', (error, stdout, stderr) -> console.log {error, stdout, stderr}
    p = Point2d(0,1)
    console.log p.rho 
    console.log p.magnitude 

@@ -20,8 +20,6 @@ class Rect
       @top = top #min(top, bottom)
       @right = right #max(left, right)
       @bottom = bottom #max(top, bottom)
-      # console.log {left, top, right, bottom}
-      # console.log @inspect()
 
    defProp = util.defProp.bind(@)
    
@@ -60,6 +58,14 @@ class Rect
          get: -> Point.new(@left, @bottom)
       'rightBottom, bottomRight':
          get: -> Point.new(@right, @bottom)
+      leftCenter:
+         get: -> Point.new @left, @center.y
+      rightCenter:
+         get: -> Point.new @right, @center.y
+      topCenter:
+         get: -> Point.new @center.x, @top
+      bottomCenter:
+         get: -> Point.new @center.x, @bottom
       type:
          get: -> util.getName(@constructor)
       center:
@@ -150,23 +156,25 @@ class Rect
    contains: (aPoint) -> 
       {x, y} = aPoint
       (@left <= x <= @right) and
-      (@bottom <= y <= @top)
+      (min(@bottom, @top) <= y <= max(@bottom, @top))
    
    includes: (aRect) -> 
       aRect = Rect.new aRect
-      return no if aRect.right > @right
-      return no if aRect.bottom > @bottom
-      return no if aRect.left < @left
-      return no if aRect.top < @top
-      yes
+      switch
+         when aRect.right > @right then no
+         when aRect.bottom > @bottom then no
+         when aRect.left < @left then no
+         when aRect.top < @top then no
+         else yes
    
    intersects: (aRect) -> 
       aRect = Rect.new aRect
-      return no if aRect.right < @left
-      return no if aRect.bottom < @top
-      return no if aRect.left > @right
-      return no if aRect.top > @bottom
-      yes
+      switch
+         when aRect.right < @left then no
+         when aRect.bottom < @top then no
+         when aRect.left > @right then no
+         when aRect.top > @bottom then no
+         else yes
 
    positionComparedTo: (aRect, opts={}) ->
       aRect = Rect.new aRect
@@ -232,14 +240,23 @@ class Rect
                   p0.x + wid
                   p0.y + hgt
                )
+            else
+               new Rect p0.x, p0.y, p0.x, p0.y
          else
             new Rect arguments...
 
 module.exports = Rect
 
 if require.main is module
+   {exec} = require('child_process')
+   exec 'cake build', (error, stdout, stderr) -> 
+      console.log {error, stdout, stderr}
+      # require '../test/test'
+
    r = Rect.new [0,0], 10, 3
    r = Rect.new {x: 1, y: 0, w: 10, h: 1}
+   r = Rect.new {x: 1, y: 0, w: 10, h: 1}
+   r = Rect.new {x: 1, y: 0}
    # r.x += 5
    # r.x += 5
    console.log r
