@@ -12,13 +12,13 @@ util = require './utilities'
 {defineProperty} = Object
 
 class NumberPair
-   constructor: (numberArray) -> 
+   constructor: (numberArray...) -> 
       if @ instanceof NumberPair
          Object.defineProperty @, '_numPair',
             enumerable: no
             value: numberArray[0..1]
 
-   copy: -> new @constructor( @_numPair )
+   copy: -> new @constructor( @_numPair... )
 
    defProp = util.defProp.bind(@)
 
@@ -87,9 +87,9 @@ class NumberPair
    @new: (x, y) ->
       switch
          when x instanceof NumberPair   then x
-         when isNumber( x[0], x[1] ) then new NumberPair [x[0], x[1]]
-         when isNumber( x, y )       then new NumberPair [x, y]
-         when isNumber( x )          then new NumberPair [x, x]
+         when isNumber( x[0], x[1] ) then new NumberPair x[0], x[1]
+         when isNumber( x, y )       then new NumberPair x, y
+         when isNumber( x )          then new NumberPair x, x
          else
             throw "NumberPair.new requires numeric inputs; got #{x} and #{y}"
             null
@@ -97,7 +97,8 @@ class NumberPair
 module.exports = NumberPair
 
 if require.main is module
-   p = new NumberPair([1/3,1/3])
+   p = new NumberPair(1/3,1/3)
    console.log p, p[0], p[1]
    console.log p.round(1/2, 1/4)
+   console.log p.copy()
 
