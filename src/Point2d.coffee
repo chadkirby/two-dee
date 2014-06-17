@@ -15,7 +15,7 @@ class Point2d extends NumberPair
    constructor: (x, y) -> 
       unless this instanceof Point2d
          return new Point2d(x, y)
-      super [x, y]
+      super x, y
 
       # define own properties (enables 'for own key, val of point')
       Object.defineProperties @, 
@@ -155,3 +155,4 @@ if require.main is module
    console.log p.angle 
    console.log p.rho_(2).y 
    console.log p.theta_(0).isFuzzyEq([2,0], 1e-10) 
+   console.log Point2d.new 0, 1

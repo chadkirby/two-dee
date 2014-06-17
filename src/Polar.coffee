@@ -14,7 +14,7 @@ class Polar extends NumberPair
    constructor: (rho, theta) -> 
       unless this instanceof Polar
          return new Polar(rho, theta)
-      super [rho, theta]
+      super rho, theta
 
       # define own properties (enables 'for own key, val of point')
       defineProperty @, 'rho', 

@@ -15,7 +15,7 @@ class Complex extends NumberPair
    constructor: (real, imag) -> 
       unless this instanceof Complex
          return new Complex(real, imag)
-      super [real, imag]
+      super real, imag
 
       # define own properties (enables 'for own key, val of point')
       defineProperty @, 'real', 
