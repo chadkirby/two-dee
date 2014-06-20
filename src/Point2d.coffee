@@ -129,6 +129,7 @@ class Point2d extends NumberPair
          else no
 
    @new: (x, y) ->
+      x ?= 'undefined'
       switch
          when x instanceof Point2d   then x
          when x.asPoint?   then x.asPoint()
@@ -137,6 +138,7 @@ class Point2d extends NumberPair
          when isNumber( x, y )       then new Point2d x, y
          when isNumber( x )          then new Point2d x, x
          else
+            console.trace()
             throw "Point2d.new requires numeric x and y; got #{x} and #{y}"
 
 Object.defineProperty Point2d, 'origin', get: -> new Point2d( 0, 0 )
@@ -155,4 +157,10 @@ if require.main is module
    console.log p.angle 
    console.log p.rho_(2).y 
    console.log p.theta_(0).isFuzzyEq([2,0], 1e-10) 
-   console.log Point2d.new 0, 1
+   # console.log Point2d.new 0, 1
+   # try
+   #    Point2d.new "can't be coerced to a number"
+   # catch e
+   #    console.log {e}
+   
+   

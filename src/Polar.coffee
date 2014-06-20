@@ -90,8 +90,8 @@ class Polar extends NumberPair
          when isNumber( rho.rho, rho.theta )   then new Polar rho.rho, rho.theta
          when isNumber( rho, theta )           then new Polar rho, theta
          else
+            console.trace()
             throw "Polar.new requires numeric rho and theta; got #{rho} and #{theta}"
-            null
 
 
 module.exports = Polar

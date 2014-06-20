@@ -87,7 +87,7 @@ class Complex extends NumberPair
          when isNumber( real, imag )           then new Complex real, imag
          when isNumber( real )           then new Complex real, 0
          else
+            console.trace()
             throw "Complex.new requires numeric real and imag; got #{real} and #{imag}"
-            null
 
 module.exports = Complex
