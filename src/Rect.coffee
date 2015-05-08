@@ -149,7 +149,9 @@ class Rect
   
    resizeTo: (h, v) -> new Rect(@left, @top, @left + h, @top + v)
   
-   insetBy: (h, v) -> new Rect(@left + h, @top + v, @right - h, @bottom - v)
+   insetBy: (h, v) -> 
+      v ?= h
+      new Rect(@left + h, @top + v, @right - h, @bottom - v)
   
    insetAll: (a, b, c, d) -> new Rect(@left + a, @top + b, @right - c, @bottom - d)
   
